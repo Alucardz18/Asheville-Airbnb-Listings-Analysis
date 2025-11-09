@@ -1,5 +1,5 @@
-room_type,totalRoomType,percentage
-"Entire home/apt",2112,90.7
-"Private room",204,8.8
-"Shared room",8,0.3
-"Hotel room",4,0.2
+room_type,total_room_type,percentage
+"Entire home/apt",2074,90.61
+"Private room",204,8.91
+"Shared room",8,0.35
+"Hotel room",3,0.13
