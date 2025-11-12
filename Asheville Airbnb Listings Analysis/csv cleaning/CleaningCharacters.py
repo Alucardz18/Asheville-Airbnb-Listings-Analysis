@@ -1,8 +1,13 @@
 import re
+import os
 
-# Input and output file paths
-input_file = "Listing-Analysis-Clean1.csv"
-output_file = "Listing-Analysis-Clean2.csv"
+# Get directory of this script
+base_dir = os.path.dirname(os.path.abspath(__file__))
+print("Current working directory:", os.getcwd())
+
+# Build absolute paths safely
+input_file = os.path.join(base_dir, "Listing-Analysis-Clean1.csv")
+output_file = os.path.join(base_dir, "Listing-Analysis-Clean2.csv")
 
 # Regular expression to remove non-printable characters and emojis
 pattern = re.compile(r'[^\x09\x0A\x0D\x20-\x7E]')
