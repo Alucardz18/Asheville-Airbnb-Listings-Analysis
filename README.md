@@ -97,7 +97,11 @@ A **Python script** (`CleaningCharacters.py`) reads the file line by line and us
 
 ## 🧾 SQL Analysis Overview
 
-All results in `/SQL/results/` come from the views in **`combined_clean_version.sql`**, which is the final, cleaned-up version of every query. The other `.sql` files are earlier drafts of individual questions.
+Results in `/SQL/results/` come from two files:
+- **`combined_clean_version.sql`**: listing-level analysis (pricing, supply, hosts, review totals), built on the cleaned listings table.
+- **`review_history.sql`**: review-level analysis (reviews by year, month, and weekday), built on `reviews.csv`.
+
+The other `.sql` files are earlier drafts of individual questions.
 
 | Category | Question | Insight |
 |-----------|------------|----------|
@@ -107,10 +111,12 @@ All results in `/SQL/results/` come from the views in **`combined_clean_version.
 | **Supply** | Active listings per neighborhood | ZIP `28806` has **640 listings**, the most in Asheville. |
 |  | Distribution of room types | **Entire home/apartment = 90.6%**, **Private room = 8.9%**, others <1%. |
 | **Hosts** | Hosts with the most listings | About 96% of hosts manage 3 or fewer listings; one host manages 104. |
-|  | Do multi-listing hosts charge more? | Yes. Hosts with 4+ listings have a median price of about $152 to $168, versus $116 for single-listing hosts. |
+|  | Do multi-listing hosts charge more? | Yes. Listings from hosts with 4+ listings average about $198 per night, versus about $156 for single-listing hosts. |
 | **Demand** | Total reviews per listing | The most-reviewed listing has **1,253 total reviews**. |
-|  | Reviews over time | Yearly reviews grew from 2020 to a peak in 2023, then dipped slightly in 2024. |
 |  | Total reviews by neighborhood | ZIPs `28806`, `28801`, and `28804` have the most guest reviews. |
+|  | Reviews by year (`review_history.sql`) | Yearly reviews grew from 2020 to a peak in 2023, then dipped slightly in 2024. |
+|  | Reviews by month, 2021 to 2024 (`review_history.sql`) | Reviews peak from May to July; January and February are the slowest months. |
+|  | Reviews by weekday (`review_history.sql`) | Sundays account for 33.8% of all reviews. |
 
 ---
 
@@ -129,7 +135,7 @@ All results in `/SQL/results/` come from the views in **`combined_clean_version.
 ### 👥 Host Behavior
 - **Most hosts are small:** about 96% manage 1 to 3 listings.
 - **Outlier host:** one host manages **104 listings**, showing some market concentration.
-- **Larger hosts charge more:** listings from hosts with 4+ properties have noticeably higher median prices than single-listing hosts, suggesting professional operators run larger or more premium properties.
+- **Larger hosts charge more:** listings from hosts with 4+ properties average about $198 per night, versus about $156 for single-listing hosts, suggesting professional operators run larger or more premium properties.
 
 ### 💬 Demand & Reviews
 - Yearly review counts **peaked in 2023** (about 54,500 reviews) after growing each year from 2020.
@@ -177,8 +183,11 @@ Future extensions could include:
 ## ▶️ How to Reproduce
 1. Run `Data/Cleaned/CleaningCharacters.py` to create `Listing-Analysis-Clean2.csv` from `Listing-Analysis-Clean1.csv`.
 2. In MySQL Workbench, create a schema named `ashevilleairbnbanalysis` and import `Listing-Analysis-Clean2.csv` as a table named `listing-analysis-clean2` (Table Data Import Wizard).
-3. Run `SQL/queries/combined_clean_version.sql` to create all analysis views.
-4. Query the views (for example, `SELECT * FROM avg_price_by_neighborhood;`) and export results to CSV for Excel.
+3. Run `SQL/queries/combined_clean_version.sql` to create the listing analysis views.
+4. Import `Data/Raw/reviews.csv` as a table named `reviews` (columns `listing_id`, `review_date`), then run `SQL/queries/review_history.sql` to create the review history views. The file also includes an optional `LOAD DATA` statement for importing the CSV directly.
+5. Query the views (for example, `SELECT * FROM avg_price_by_neighborhood;` or `SELECT * FROM reviews_by_weekday;`) and export results to CSV for Excel.
+
+> Note: the `avg_reviews_per_month` view in `combined_clean_version.sql` measures something different from the review history views. It averages each listing's `reviews_per_month` value, grouped by the month of that listing's most recent review. The yearly, monthly, and weekday review findings come from `review_history.sql`.
 
 ---
 
@@ -190,7 +199,8 @@ Future extensions could include:
 |  | `/Data/Cleaned/Listing-Analysis-Clean1.csv` | Listings after removing unused columns and rows with no price or reviews. |
 |  | `/Data/Cleaned/Listing-Analysis-Clean2.csv` | Final cleaned listings file used in MySQL. |
 |  | `/Data/Cleaned/CleaningCharacters.py` | Script that removes special characters for the MySQL import. |
-| **SQL** | `/SQL/queries/combined_clean_version.sql` | Final queries, organized as views (source of all results). |
+| **SQL** | `/SQL/queries/combined_clean_version.sql` | Final listing queries, organized as views. |
+|  | `/SQL/queries/review_history.sql` | Review history queries (by year, month, and weekday) built on `reviews.csv`. |
 |  | `/SQL/queries/` (other files) | Earlier drafts of individual queries. |
 |  | `/SQL/results/` | Query results in CSV format, used for the Excel visuals. |
 | **Analysis** | `/Analysis/excel/Graphs and pivot tables.xlsx` | Excel dashboard with PivotTables and charts summarizing the findings. |
