@@ -29,8 +29,8 @@ The listings file is a single snapshot, and the reviews file ends in **June 2025
 |--------|--------|----------|
 | **Average Nightly Price** | **$172.20** | Median price is $127.00, showing a right skew from premium listings. |
 | **Most Expensive Neighborhood** | **28732 ($213.95 avg)** | Highest prices but the fewest listings (63). |
-| **Cheapest Neighborhood** | **28806 ($164.14 avg)** | Most competitive ZIP code, with 640 listings. |
-| **Dominant Room Type** | **Entire home/apartment (90.6%)** | Reflects Asheville's preference for private stays. |
+| **Cheapest Neighborhood** | **28806 ($164.14 avg)** | Most competitive ZIP code, with 646 listings. |
+| **Dominant Room Type** | **Entire home/apartment (90.7%)** | Reflects Asheville's preference for private stays. |
 | **Top Host Portfolio** | **104 listings (Host ID 167186184)** | A few large hosts control a noticeable share of supply. |
 | **Peak Guest Activity** | **Late spring through summer** | In full years (2021 to 2024), reviews are highest from May to July; January and February are the slowest months. |
 | **Top ZIPs for Demand** | **28806, 28801, 28804** | These areas collect the most guest reviews. |
@@ -128,8 +128,8 @@ The other `.sql` files are earlier drafts of individual questions.
 | **Pricing** | Average price by neighborhood | Average nightly price ranges from **$164 to $214**; ZIP `28732` is highest. |
 |  | Minimum nights vs. average price | 3 to 4 night minimums have the highest average price ($221); prices mostly fall as minimum stays get longer. |
 |  | Overall average and median price | Mean ($172) > Median ($127), confirming right-skewed pricing. |
-| **Supply** | Active listings per neighborhood | ZIP `28806` has **640 listings**, the most in Asheville. |
-|  | Distribution of room types | **Entire home/apartment = 90.6%**, **Private room = 8.9%**, others <1%. |
+| **Supply** | Active listings per neighborhood | ZIP `28806` has **646 listings**, the most in Asheville. |
+|  | Distribution of room types | **Entire home/apartment = 90.7%**, **Private room = 8.8%**, others <1%. |
 | **Hosts** | Hosts with the most listings | About 96% of hosts manage 3 or fewer listings; one host manages 104. |
 |  | Do multi-listing hosts charge more? | Yes. Listings from hosts with 4+ listings average about $198 per night, versus about $156 for single-listing hosts. |
 | **Demand** | Total reviews per listing | The most-reviewed listing has **1,253 total reviews**. |
@@ -143,7 +143,7 @@ The other `.sql` files are earlier drafts of individual questions.
 ## 📊 Key Findings
 
 ### 🏠 Market Composition
-- **Entire homes/apartments** dominate (90.6%), followed by **private rooms (8.9%)**.
+- **Entire homes/apartments** dominate (90.7%), followed by **private rooms (8.8%)**.
 - ZIPs **28806 and 28801** lead in both listings and guest reviews, followed by 28803 (listings) and 28804 (reviews).
 
 ### 💰 Pricing Trends
@@ -186,7 +186,7 @@ Hosts and investors should focus on **ZIPs 28806, 28801, and 28804**, keep **1 t
 ## 🚧 Limitations
 - **Reviews are not bookings.** Demand is measured with review counts, which undercount actual stays.
 - **2025 is a partial year** (data ends in June), so it is excluded from seasonal comparisons.
-- **Some listing IDs lost precision.** Very long listing IDs were stored in scientific notation (likely after the file was saved in Excel), so a few different listings share the same rounded ID. This is why MySQL counts about 2,290 unique listings instead of 2,332.
+- **Some listing IDs lost precision.** Very long listing IDs are stored in scientific notation in the source data (including `Data/Raw/listings.csv`), so a few different listings share the same rounded ID. Because of this, the queries count listing rows instead of distinct IDs.
 - **Outliers were not removed**, which pulls averages up; medians are shown where it matters.
 
 ---

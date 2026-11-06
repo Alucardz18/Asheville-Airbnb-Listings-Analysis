@@ -30,19 +30,21 @@ WITH base AS (
   FROM listings_clean
   WHERE room_type IS NOT NULL
 ),
-tot AS ( SELECT COUNT(DISTINCT id) AS total_listings FROM base )
+tot AS ( SELECT COUNT(*) AS total_listings FROM base )
 SELECT
   b.room_type,
-  COUNT(DISTINCT b.id) AS total_room_type,
-  ROUND(100.0 * COUNT(DISTINCT b.id) / NULLIF(t.total_listings,0), 2) AS percentage
+  COUNT(*) AS total_room_type,
+  ROUND(100.0 * COUNT(*) / NULLIF(t.total_listings,0), 2) AS percentage
 FROM base b
 CROSS JOIN tot t
 GROUP BY b.room_type, t.total_listings;
 
--- Active listings per neighborhood (unique listings)
+-- Active listings per neighborhood
+-- Counts rows, not DISTINCT id: large IDs were rounded in the source data,
+-- so some different listings share the same id.
 CREATE OR REPLACE VIEW active_listings_by_neighborhood AS
 SELECT neighbourhood,
-       COUNT(DISTINCT id) AS active_listings
+       COUNT(*) AS active_listings
 FROM listings_clean
 GROUP BY neighbourhood;
 
@@ -149,7 +151,7 @@ GROUP BY neighbourhood;
 
 -- Hosts with the most listings
 CREATE OR REPLACE VIEW top_hosts_by_listing_count AS
-SELECT host_id, host_name, COUNT(DISTINCT id) AS listings_count
+SELECT host_id, host_name, COUNT(*) AS listings_count
 FROM `listing-analysis-clean2`
 GROUP BY host_id, host_name;
 
