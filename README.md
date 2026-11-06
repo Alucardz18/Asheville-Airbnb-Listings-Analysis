@@ -49,6 +49,12 @@ Screenshots from `Analysis/excel/Graphs and pivot tables.xlsx`.
 
 ![Excel dashboard showing average nightly price by neighborhood, minimum stay vs. nightly price, and average vs. median price by minimum stay](images/dashboard-pricing.png)
 
+**Guest activity:** total reviews by neighborhood, review activity over time, and the most-reviewed listings.
+
+![Excel dashboard showing total reviews by neighborhood, review activity trends over time, and top listings by total guest reviews](images/dashboard-reviews.png)
+
+> Note: the "Review Activity Trends Over Time" chart uses the `avg_reviews_per_month` view (listings' average monthly review rate, grouped by the year of their most recent review). It is not a count of reviews per year; yearly review totals come from `review_history.sql`.
+
 ---
 
 ## 🎯 Objectives
