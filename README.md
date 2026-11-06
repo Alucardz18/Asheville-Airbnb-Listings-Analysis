@@ -1,13 +1,25 @@
 # 🏡 Asheville Airbnb Listings Analysis
-**Tools Used:** SQL · Excel · Python (for cleaning)
+**Tools Used:** SQL (MySQL) · Excel · Python (for cleaning)
 
 ---
 
 ## 📘 Introduction
-This project analyzes **Airbnb listings in Asheville, North Carolina**, to uncover patterns in **pricing**, **host activity**, and **guest demand**.  
-Using SQL, Excel, and Python, this analysis connects listing data with review activity to understand what drives Airbnb performance across neighborhoods.
+This project analyzes **Airbnb listings in Asheville, North Carolina**, to uncover patterns in **pricing**, **host activity**, and **guest demand**.
+Using MySQL, Excel, and a small Python script, the analysis looks at listing details alongside review activity to understand what drives Airbnb performance across neighborhoods (ZIP codes).
 
-The dataset comes from **Analyst Builder**, with analysis performed using **MySQL**, **Excel PivotTables**, and **Python (pandas, numpy)** for data cleaning and preparation.
+The dataset comes from **Analyst Builder's Airbnb Market Case Study**. Queries were written in **MySQL Workbench**, visuals were built with **Excel PivotTables**, and **Python** was used to fix a character encoding problem that blocked the MySQL import.
+
+---
+
+## 🗃️ Dataset
+
+| File | Rows | Contents |
+|------|------|----------|
+| `listings.csv` | 2,876 | One row per listing: host, ZIP code, room type, price, minimum nights, review counts, availability |
+| `reviews.csv` | 318,549 | One row per review: `listing_id` and `date` only (no review text), from July 2011 to June 2025 |
+| `neighbourhoods.csv` | 8 | The 8 Asheville-area ZIP codes used as neighborhoods |
+
+The listings file is a single snapshot, and the reviews file ends in **June 2025**, so 2025 is a partial year.
 
 ---
 
@@ -15,139 +27,158 @@ The dataset comes from **Analyst Builder**, with analysis performed using **MySQ
 
 | Metric | Value | Insight |
 |--------|--------|----------|
-| **Average Nightly Price** | **$169.00** | Median price is $128.00, showing right-skewed premium listings. |
-| **Most Expensive Neighborhood** | **28732 ($213.95 avg)** | Likely luxury listings with fewer total properties. |
-| **Cheapest Neighborhood** | **28806 ($164.14 avg)** | Most competitive ZIP code with 640+ listings. |
-| **Dominant Room Type** | **Entire home/apartment (90.6%)** | Reflects Asheville’s tourism preference for private stays. |
-| **Top Host Portfolio** | **104 listings (Host ID 167186184)** | Indicates market concentration by a few large hosts. |
-| **Peak Guest Activity** | **May (late spring)** | Review activity stays high from March through July; January and February are the slowest months. |
-| **Top ZIPs for Demand** | **28806, 28801, 28804** | These areas attract the most guests and reviews. |
+| **Average Nightly Price** | **$169.00** | Median price is $128.00, showing a right skew from premium listings. |
+| **Most Expensive Neighborhood** | **28732 ($213.95 avg)** | Highest prices but the fewest listings (63). |
+| **Cheapest Neighborhood** | **28806 ($164.14 avg)** | Most competitive ZIP code, with 640 listings. |
+| **Dominant Room Type** | **Entire home/apartment (90.6%)** | Reflects Asheville's preference for private stays. |
+| **Top Host Portfolio** | **104 listings (Host ID 167186184)** | A few large hosts control a noticeable share of supply. |
+| **Peak Guest Activity** | **Late spring through summer** | In full years (2021 to 2024), reviews are highest from May to July; January and February are the slowest months. |
+| **Top ZIPs for Demand** | **28806, 28801, 28804** | These areas collect the most guest reviews. |
 
 ---
 
 ## 🎯 Objectives
 The main goals of this analysis are:
 
-1. To explore the distribution and characteristics of Airbnb listings across Asheville.  
-2. To examine **pricing trends** by neighborhood and minimum stay requirements.  
-3. To analyze **host behavior** and market concentration.  
-4. To uncover **guest demand patterns** using review data.  
+1. To explore the distribution and characteristics of Airbnb listings across Asheville.
+2. To examine **pricing trends** by neighborhood and minimum stay requirements.
+3. To analyze **host behavior** and market concentration.
+4. To uncover **guest demand patterns** using review data.
 5. To provide **recommendations** for hosts, investors, and tourism marketers.
 
 ---
 
-## 🧰 Tools and Libraries Used
+## 🧰 Tools Used
 
 ### 🧮 SQL (MySQL Workbench)
-Used for querying, aggregating, and transforming datasets.  
-Key techniques: **CTEs**, **window functions**, **joins**, and **ranking**.
+Used for querying, aggregating, and transforming the data.
+Key techniques: **CTEs**, **window functions** (`ROW_NUMBER`, `DENSE_RANK`, `COUNT() OVER`), **views**, **CASE bucketing**, and **date parsing**.
 
 ### 📊 Excel
-Used for data exploration, **PivotTables**, and building the **interactive dashboard** summarizing pricing, host activity, and reviews.
+Used for data exploration, **PivotTables**, and building the **dashboard** summarizing pricing, host activity, and reviews.
 
 ### 🐍 Python
-Used primarily for data cleaning (`CleaningCharacters.py`):  
-- **pandas** – data wrangling  
-- **numpy** – numerical operations  
-- **matplotlib / seaborn** – exploratory visuals (optional)  
+Used for one cleaning step: `CleaningCharacters.py` uses Python's built-in `re` module to strip characters that MySQL could not import (see below). No external libraries are required.
 
 ---
 
 ## 🧹 Data Cleaning
-**Performed in Python and SQL**
 
-Steps:
-- Removed irrelevant columns and standardized names.  
-- Checked for duplicates — none found.  
-- Filled missing `price` values with **median** to reduce skew from luxury listings.  
-- Winsorized extreme outliers in `price` and `minimum_nights`.  
-- Converted date columns to `datetime` format.  
-- Merged `listings.csv` and `reviews.csv` to link listing details with review data.  
-- Filtered reviews between **2021–2025** to focus on recent activity.
+Steps taken to go from `listings.csv` (2,876 rows) to `Listing-Analysis-Clean2.csv` (2,332 rows):
+
+- **Dropped unused columns:** `neighbourhood_group` and `license` were empty for every listing.
+- **Removed listings with no price** (340 rows), since they can't be used in pricing analysis.
+- **Removed listings with no reviews** (no `last_review` or `reviews_per_month`), leaving only listings with guest activity.
+- **Checked for duplicate rows:** none found.
+- **Removed special characters** from text fields so the file could be imported into MySQL (`Clean1` → `Clean2`).
+- **Parsed dates in SQL:** `last_review` is stored as `M/D/YYYY` text and converted with `STR_TO_DATE` inside the queries.
+
+Outliers were **kept** (for example, one listing at $2,043/night and minimum stays up to 730 nights). This is why the median is reported alongside the average.
+
 ---
 
 ## ⚠️ Problems Faced and Solutions
 
 ### Problem:
-During import, the original `listings.csv` file **could not be loaded into MySQL Workbench** due to **special or invalid UTF-8 characters** within text fields (e.g., description, name).
+The cleaned `listings.csv` file **could not be loaded into MySQL Workbench** because some text fields (listing names, host names) contained **emojis and other special characters**.
 
 ### Diagnosis:
-MySQL threw an encoding error (“incorrect string value”) when reading the file, preventing full table creation.
+MySQL threw an encoding error ("incorrect string value") when reading the file, preventing full table creation.
 
 ### Solution:
-A **Python-based text cleaning script** (`CleaningCharacters.py`) was used to identify and remove these invalid characters.  
-Using `pandas`, the file was re-encoded in UTF-8 and saved as a clean version (`Listing-Analysis-Clean1.csv` → `Listing-Analysis-Clean2.csv`), which successfully loaded into MySQL.
+A **Python script** (`CleaningCharacters.py`) reads the file line by line and uses a regular expression to remove every character outside the standard printable ASCII range, then saves the result as `Listing-Analysis-Clean2.csv`.
 
 ### Outcome:
-- The cleaned dataset imported **without errors**.  
-- All text fields remained intact and analysis-ready.  
-- This ensured full compatibility between **Python preprocessing** and **SQL querying** workflows.
+- The cleaned dataset imported **without errors**.
+- All numeric fields were unaffected.
+- **Trade-off:** emojis and accented letters (for example, "é") were removed from listing and host names. This doesn't affect any analysis here, since none of it uses those text fields.
+
 ---
 
 ## 🧾 SQL Analysis Overview
 
-| Category | SQL Query | Insight |
+All results in `/SQL/results/` come from the views in **`combined_clean_version.sql`**, which is the final, cleaned-up version of every query. The other `.sql` files are earlier drafts of individual questions.
+
+| Category | Question | Insight |
 |-----------|------------|----------|
-| **Pricing** | `Average Price by Neighborhood.sql` | Average nightly price ranges from **$164–$214**; ZIP `28732` is highest. |
-|  | `minimum_nights vs average price.sql` | 3–4 night minimums command the highest average price ($221); prices fall steadily for longer minimum stays. |
-|  | `average nightly price.sql` | Mean ($169) > Median ($128), confirming right-skewed pricing. |
-| **Supply** | `Active Listings per Neighborhood.sql` | ZIP `28806` has **640 active listings**, the highest in Asheville. |
-|  | `Distribution of Room Types.sql` | **Entire home/apartment = 90.6%**, **Private room = 8.9%**, others <1%. |
-| **Hosts** | `combined_clean_version.sql` (host views) | About 96% of hosts manage 3 or fewer listings; one host manages 104. |
-|  | `combined_clean_version.sql` (host views) | Multi-listing hosts tend to keep consistent mid-tier pricing. |
-| **Demand** | `total number of reviews per listing.sql` | Most active listing received **1,253 total reviews**. |
-|  | `combined_clean_version.sql` (review views) | Reviews increased steadily from 2020–2023, dipped slightly in 2024. |
-|  | `combined_clean_version.sql` (review views) | ZIPs `28806`, `28801`, and `28804` show strongest guest demand. |
+| **Pricing** | Average price by neighborhood | Average nightly price ranges from **$164 to $214**; ZIP `28732` is highest. |
+|  | Minimum nights vs. average price | 3 to 4 night minimums have the highest average price ($221); prices mostly fall as minimum stays get longer. |
+|  | Overall average and median price | Mean ($169) > Median ($128), confirming right-skewed pricing. |
+| **Supply** | Active listings per neighborhood | ZIP `28806` has **640 listings**, the most in Asheville. |
+|  | Distribution of room types | **Entire home/apartment = 90.6%**, **Private room = 8.9%**, others <1%. |
+| **Hosts** | Hosts with the most listings | About 96% of hosts manage 3 or fewer listings; one host manages 104. |
+|  | Do multi-listing hosts charge more? | Yes. Hosts with 4+ listings have a median price of about $152 to $168, versus $116 for single-listing hosts. |
+| **Demand** | Total reviews per listing | The most-reviewed listing has **1,253 total reviews**. |
+|  | Reviews over time | Yearly reviews grew from 2020 to a peak in 2023, then dipped slightly in 2024. |
+|  | Total reviews by neighborhood | ZIPs `28806`, `28801`, and `28804` have the most guest reviews. |
 
 ---
 
 ## 📊 Key Findings
 
 ### 🏠 Market Composition
-- **Entire homes/apartments** dominate (90.6%), followed by **Private rooms (8.9%)**.  
-- Neighborhoods **28806 and 28801** lead in both listings and guest reviews, followed by 28803 (listings) and 28804 (reviews).
+- **Entire homes/apartments** dominate (90.6%), followed by **private rooms (8.9%)**.
+- ZIPs **28806 and 28801** lead in both listings and guest reviews, followed by 28803 (listings) and 28804 (reviews).
 
 ### 💰 Pricing Trends
-- **Average price:** $169 | **Median:** $128 → right-skewed distribution.  
-- **3–4 night minimum stays** are priced highest ($221), ahead of 1–2 night stays ($171), which make up most listings.  
-- **Long-term stays (31+ nights)** average around $109.  
-- **ZIP 28732** has the **highest average price ($213.95)**; **28806** is most competitive.
+- **Average price:** $169 | **Median:** $128 → right-skewed distribution.
+- **3 to 4 night minimum stays** are priced highest ($221), ahead of 1 to 2 night stays ($171), which make up most listings (1,832).
+- **Long-term stays (31+ nights)** average around $109, though only 12 listings fall in this group.
+- **ZIP 28732** has the **highest average price ($213.95)**; **28806** has the lowest average ($164.14) and the most listings.
 
 ### 👥 Host Behavior
-- **Majority:** small hosts. About 96% of hosts manage 1–3 listings.  
-- **Outlier host:** manages **104+ listings** → market concentration.  
-- Larger hosts tend to price competitively within the mid-range.
+- **Most hosts are small:** about 96% manage 1 to 3 listings.
+- **Outlier host:** one host manages **104 listings**, showing some market concentration.
+- **Larger hosts charge more:** listings from hosts with 4+ properties have noticeably higher median prices than single-listing hosts, suggesting professional operators run larger or more premium properties.
 
 ### 💬 Demand & Reviews
-- Demand **peaked in 2023**, with steady growth since 2020.  
-- **Seasonality:** review activity peaks in **May** and stays strong through **July**, then drops to its lowest in **January and February**.  
-- **Sundays** account for **~33.8% of reviews**, likely due to weekend checkouts.  
-- ZIPs **28806, 28801, and 28804** generate the highest engagement.
+- Yearly review counts **peaked in 2023** (about 54,500 reviews) after growing each year from 2020.
+- **Seasonality:** in full years (2021 to 2024), review activity is strongest from **May through July**, stays high into the fall, and drops to its lowest in **January and February**.
+- **Sundays** account for **about 33.8% of reviews**, most likely because guests review after weekend checkouts.
+- ZIPs **28806, 28801, and 28804** generate the most guest reviews.
+
+> Note: review counts are a stand-in for demand. Not every guest leaves a review, so they show relative activity, not actual bookings.
 
 ---
 
 ## 💬 Conclusion and Insights
 
-The Asheville Airbnb market is **active, competitive, and seasonally influenced**.  
-Most properties are **entire homes**, suggesting that travelers prefer private stays, while **a few large hosts dominate supply**.
+The Asheville Airbnb market is **active, competitive, and seasonal**.
+Most properties are **entire homes**, suggesting travelers prefer private stays, and while most hosts are small, **a few large hosts manage a notable share of supply**.
 
 **Key takeaways:**
-- **28806** offers opportunity for budget-conscious travelers and competitive hosts.  
-- **28732** and **28801** cater to higher-end travelers seeking premium experiences.  
-- **Short minimum stays (under a week)** yield the highest nightly rates, so hosts can optimize by keeping minimums flexible.  
-- **Demand patterns** mirror Asheville’s tourism calendar: strong spring and summer, slow winters.
+- **28806** offers opportunity for budget-conscious travelers and competitive hosts.
+- **28732** and **28801** cater to higher-end travelers seeking premium stays.
+- **Short minimum stays (under a week)** have the highest nightly rates, so flexible minimums appear to support stronger pricing.
+- **Demand patterns** follow Asheville's tourism calendar: strong spring and summer, slow winters.
 
-**Strategic Recommendation:**  
-Hosts and investors should focus on **neighborhoods 28806, 28801, and 28804**, maintain **1–4 night minimum stays**, and use **midweek-to-weekend marketing campaigns** to capitalize on booking surges.
+**Strategic Recommendation:**
+Hosts and investors should focus on **ZIPs 28806, 28801, and 28804**, keep **1 to 4 night minimum stays**, and plan pricing and promotions around the **May to July peak**, using the slow **January and February** months for discounts or maintenance.
+
+---
+
+## 🚧 Limitations
+- **Reviews are not bookings.** Demand is measured with review counts, which undercount actual stays.
+- **2025 is a partial year** (data ends in June), so it is excluded from seasonal comparisons.
+- **Some listing IDs lost precision.** Very long listing IDs were stored in scientific notation (likely after the file was saved in Excel), so a few different listings share the same rounded ID. This is why MySQL counts about 2,290 unique listings instead of 2,332.
+- **Outliers were not removed**, which pulls averages up; medians are shown where it matters.
 
 ---
 
 ## 🔍 Opportunities for Further Analysis
 Future extensions could include:
-- 🧠 **Predictive modeling** for price or occupancy based on location and host metrics.  
-- 🌎 **Geospatial analysis** to visualize price clusters by ZIP or neighborhood.  
-- 💬 **Sentiment analysis** on review text for guest satisfaction insights.  
-- ⭐ **Host performance** evaluation (e.g., Superhost status, response time).  
+- 🧠 **Predictive modeling** for price or occupancy based on location and host metrics.
+- 🌎 **Geospatial analysis** using the latitude and longitude columns to map price clusters.
+- 💬 **Sentiment analysis** on review text (this would require the full reviews dataset, since `reviews.csv` only includes dates).
+- ⭐ **Host performance** evaluation (for example, Superhost status or response time) with a more detailed listings file.
+
+---
+
+## ▶️ How to Reproduce
+1. Run `Data/Cleaned/CleaningCharacters.py` to create `Listing-Analysis-Clean2.csv` from `Listing-Analysis-Clean1.csv`.
+2. In MySQL Workbench, create a schema named `ashevilleairbnbanalysis` and import `Listing-Analysis-Clean2.csv` as a table named `listing-analysis-clean2` (Table Data Import Wizard).
+3. Run `SQL/queries/combined_clean_version.sql` to create all analysis views.
+4. Query the views (for example, `SELECT * FROM avg_price_by_neighborhood;`) and export results to CSV for Excel.
 
 ---
 
@@ -156,14 +187,17 @@ Future extensions could include:
 | Category | File | Description |
 |-----------|------|-------------|
 | **Data** | `/Data/Raw/` | Original Airbnb datasets (`listings.csv`, `reviews.csv`, `neighbourhoods.csv`). |
-|  | `/Data/Cleaned/Listing-Analysis-Clean2.csv` | Cleaned and merged dataset used for analysis. |
-| **SQL** | `/SQL/queries/` | All SQL scripts used for pricing, host, and review analyses. |
-|  | `/SQL/results/` | Query results in CSV format (ready for Excel visualization). |
-| **Analysis** | `/Analysis/excel/Graphs and pivot tables.xlsx` | Interactive Excel dashboard summarizing findings. |
+|  | `/Data/Cleaned/Listing-Analysis-Clean1.csv` | Listings after removing unused columns and rows with no price or reviews. |
+|  | `/Data/Cleaned/Listing-Analysis-Clean2.csv` | Final cleaned listings file used in MySQL. |
+|  | `/Data/Cleaned/CleaningCharacters.py` | Script that removes special characters for the MySQL import. |
+| **SQL** | `/SQL/queries/combined_clean_version.sql` | Final queries, organized as views (source of all results). |
+|  | `/SQL/queries/` (other files) | Earlier drafts of individual queries. |
+|  | `/SQL/results/` | Query results in CSV format, used for the Excel visuals. |
+| **Analysis** | `/Analysis/excel/Graphs and pivot tables.xlsx` | Excel dashboard with PivotTables and charts summarizing the findings. |
 | **Documentation** | `README.md` | Project overview, findings, and structure. |
 
 ---
 
 ## 🧾 Credit
-Dataset and analytical framework adapted from **Analyst Builder’s Airbnb Market Case Study**.  
+Dataset and analytical framework adapted from **Analyst Builder's Airbnb Market Case Study**.
 All SQL, Excel, and reporting developed by *Nii Oye Kpakpo* (2025).
