@@ -37,6 +37,20 @@ The listings file is a single snapshot, and the reviews file ends in **June 2025
 
 ---
 
+## 📊 Excel Dashboard
+
+Screenshots from `Analysis/excel/Graphs and pivot tables.xlsx`.
+
+**Supply and hosts:** room type distribution, active listings by neighborhood, top hosts, and host scale vs. price.
+
+![Excel dashboard showing room type distribution, active listings by neighborhood, top hosts by listing count, and host scale vs. average nightly price](images/dashboard-supply-hosts.png)
+
+**Pricing:** average price by neighborhood, minimum stay vs. price, and average vs. median price by minimum stay.
+
+![Excel dashboard showing average nightly price by neighborhood, minimum stay vs. nightly price, and average vs. median price by minimum stay](images/dashboard-pricing.png)
+
+---
+
 ## 🎯 Objectives
 The main goals of this analysis are:
 
@@ -204,6 +218,7 @@ Future extensions could include:
 |  | `/SQL/queries/` (other files) | Earlier drafts of individual queries. |
 |  | `/SQL/results/` | Query results in CSV format, used for the Excel visuals. |
 | **Analysis** | `/Analysis/excel/Graphs and pivot tables.xlsx` | Excel dashboard with PivotTables and charts summarizing the findings. |
+|  | `/images/` | Dashboard screenshots shown in this README. |
 | **Documentation** | `README.md` | Project overview, findings, and structure. |
 
 ---
