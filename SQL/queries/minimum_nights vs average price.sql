@@ -12,6 +12,6 @@ SELECT
   COUNT(*) AS listing_count
 FROM `listing-analysis-clean2`
 WHERE price IS NOT NULL
-GROUP BY stay_length_category
+GROUP BY stay_length
 ORDER BY avg_price DESC;
 

@@ -4,5 +4,6 @@ select
     neighbourhood, 
     round(avg(price),2) average_price     
 from `listing-analysis-clean2`
-GROUP BY neighbourhood 
+GROUP BY neighbourhood
+order by average_price desc
 limit 5;

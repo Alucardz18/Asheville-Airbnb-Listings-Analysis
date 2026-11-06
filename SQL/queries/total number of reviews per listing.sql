@@ -1,6 +1,6 @@
 -- total number of reviews per listing and the average reviews per month
 -- reviews per listing
-select id, count(number_of_reviews) total_reviews
+select id, sum(number_of_reviews) total_reviews
 from `listing-analysis-clean2`
 GROUP BY id
 order by total_reviews desc
