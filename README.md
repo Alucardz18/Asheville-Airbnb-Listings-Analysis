@@ -27,7 +27,7 @@ The listings file is a single snapshot, and the reviews file ends in **June 2025
 
 | Metric | Value | Insight |
 |--------|--------|----------|
-| **Average Nightly Price** | **$169.00** | Median price is $128.00, showing a right skew from premium listings. |
+| **Average Nightly Price** | **$172.20** | Median price is $127.00, showing a right skew from premium listings. |
 | **Most Expensive Neighborhood** | **28732 ($213.95 avg)** | Highest prices but the fewest listings (63). |
 | **Cheapest Neighborhood** | **28806 ($164.14 avg)** | Most competitive ZIP code, with 640 listings. |
 | **Dominant Room Type** | **Entire home/apartment (90.6%)** | Reflects Asheville's preference for private stays. |
@@ -127,7 +127,7 @@ The other `.sql` files are earlier drafts of individual questions.
 |-----------|------------|----------|
 | **Pricing** | Average price by neighborhood | Average nightly price ranges from **$164 to $214**; ZIP `28732` is highest. |
 |  | Minimum nights vs. average price | 3 to 4 night minimums have the highest average price ($221); prices mostly fall as minimum stays get longer. |
-|  | Overall average and median price | Mean ($169) > Median ($128), confirming right-skewed pricing. |
+|  | Overall average and median price | Mean ($172) > Median ($127), confirming right-skewed pricing. |
 | **Supply** | Active listings per neighborhood | ZIP `28806` has **640 listings**, the most in Asheville. |
 |  | Distribution of room types | **Entire home/apartment = 90.6%**, **Private room = 8.9%**, others <1%. |
 | **Hosts** | Hosts with the most listings | About 96% of hosts manage 3 or fewer listings; one host manages 104. |
@@ -147,7 +147,7 @@ The other `.sql` files are earlier drafts of individual questions.
 - ZIPs **28806 and 28801** lead in both listings and guest reviews, followed by 28803 (listings) and 28804 (reviews).
 
 ### 💰 Pricing Trends
-- **Average price:** $169 | **Median:** $128 → right-skewed distribution.
+- **Average price:** $172 | **Median:** $127 → right-skewed distribution.
 - **3 to 4 night minimum stays** are priced highest ($221), ahead of 1 to 2 night stays ($171), which make up most listings (1,832).
 - **Long-term stays (31+ nights)** average around $109, though only 12 listings fall in this group.
 - **ZIP 28732** has the **highest average price ($213.95)**; **28806** has the lowest average ($164.14) and the most listings.
