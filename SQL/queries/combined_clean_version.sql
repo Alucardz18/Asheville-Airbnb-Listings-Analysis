@@ -1,6 +1,8 @@
 USE ashevilleairbnbanalysis;
 
 /*    CLEAN BASE */
+
+-- Listings that have a price and a neighborhood
 CREATE OR REPLACE VIEW listings_clean AS
 SELECT *
 FROM `listing-analysis-clean2`
@@ -9,7 +11,7 @@ WHERE price IS NOT NULL
 
 /*    DESCRIPTIVE ANALYSIS */
 
--- Overall average & median nightly price
+-- Average and median nightly price of all listings
 CREATE OR REPLACE VIEW overall_avg_median_price AS
 WITH ordered AS (
   SELECT price,
@@ -23,7 +25,7 @@ SELECT
   ROUND(AVG(CASE WHEN rn IN (FLOOR((cnt+1)/2), CEIL((cnt+1)/2)) THEN price END), 2) AS median_price
 FROM ordered;
 
--- Room type distribution (count & %)
+-- Number and percentage of listings per room type
 CREATE OR REPLACE VIEW room_type_distribution AS
 WITH base AS (
   SELECT id, room_type
@@ -39,9 +41,7 @@ FROM base b
 CROSS JOIN tot t
 GROUP BY b.room_type, t.total_listings;
 
--- Active listings per neighborhood
--- Counts rows, not DISTINCT id: large IDs were rounded in the source data,
--- so some different listings share the same id.
+-- Number of listings per neighborhood (counts rows, since some long IDs repeat)
 CREATE OR REPLACE VIEW active_listings_by_neighborhood AS
 SELECT neighbourhood,
        COUNT(*) AS active_listings
@@ -50,14 +50,14 @@ GROUP BY neighbourhood;
 
 /*    PRICING INSIGHTS */
 
--- Average price by neighborhood
+-- Average nightly price per neighborhood
 CREATE OR REPLACE VIEW avg_price_by_neighborhood AS
 SELECT neighbourhood,
        ROUND(AVG(price), 2) AS average_price
 FROM listings_clean
 GROUP BY neighbourhood;
 
--- Top 5 most expensive neighborhoods (dense-ranked)
+-- Top 5 neighborhoods by average nightly price
 CREATE OR REPLACE VIEW top5_neighborhoods AS
 WITH avg_neigh AS (
   SELECT neighbourhood, ROUND(AVG(price), 2) AS average_price
@@ -74,7 +74,7 @@ SELECT rank_num, neighbourhood, average_price
 FROM ranked
 WHERE rank_num <= 5;
 
--- Avg & median nightly price BY minimum_nights
+-- Average and median nightly price for each minimum_nights value
 CREATE OR REPLACE VIEW avg_median_price_by_min_nights AS
 WITH ordered AS (
   SELECT minimum_nights,
@@ -92,7 +92,7 @@ SELECT minimum_nights,
 FROM ordered
 GROUP BY minimum_nights;
 
--- Does minimum_nights affect average price? (bucketed)
+-- Average nightly price and listing count by minimum stay range
 CREATE OR REPLACE VIEW min_nights_vs_price AS
 SELECT
   CASE
@@ -111,7 +111,7 @@ GROUP BY stay_length;
 
 /*    REVIEW & DEMAND ANALYSIS */
 
--- Total reviews per listing (prefer SUM of total column)
+-- Total reviews per listing
 CREATE OR REPLACE VIEW total_reviews_per_listing AS
 SELECT id,
        SUM(number_of_reviews) AS total_reviews
@@ -119,7 +119,7 @@ FROM `listing-analysis-clean2`
 WHERE id IS NOT NULL
 GROUP BY id;
 
--- Average reviews per month by YYYY-MM of last_review
+-- Average reviews_per_month, grouped by the month of the last review
 CREATE OR REPLACE VIEW avg_reviews_per_month AS
 WITH parsed AS (
   SELECT
@@ -139,7 +139,7 @@ FROM parsed
 WHERE last_review_dt IS NOT NULL AND reviews_per_month IS NOT NULL
 GROUP BY DATE_FORMAT(last_review_dt, '%Y-%m');
 
--- Neighborhoods with most guest activity (total reviews)
+-- Total reviews per neighborhood
 CREATE OR REPLACE VIEW neighborhood_total_reviews AS
 SELECT neighbourhood,
        SUM(number_of_reviews) AS total_reviews
@@ -149,13 +149,13 @@ GROUP BY neighbourhood;
 
 /*  HOST ANALYSIS  */
 
--- Hosts with the most listings
+-- Number of listings per host
 CREATE OR REPLACE VIEW top_hosts_by_listing_count AS
 SELECT host_id, host_name, COUNT(*) AS listings_count
 FROM `listing-analysis-clean2`
 GROUP BY host_id, host_name;
 
--- Do multi-listing hosts charge more?
+-- Average nightly price and listing count by host listing count
 CREATE OR REPLACE VIEW host_scale_vs_price AS
 SELECT calculated_host_listings_count,
        ROUND(AVG(price), 2) AS avg_price,

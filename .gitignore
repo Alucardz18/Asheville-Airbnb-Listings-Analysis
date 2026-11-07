@@ -4,3 +4,9 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 .DS_Store
+
+# Original Excel workbook (kept locally, replaced by Asheville Airbnb Dashboard.xlsx)
+Analysis/excel/Graphs and pivot tables.xlsx
+
+# Excel temporary lock files
+~$*

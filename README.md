@@ -27,9 +27,9 @@ The listings file is a single snapshot, and the reviews file ends in **June 2025
 
 | Metric | Value | Insight |
 |--------|--------|----------|
-| **Average Nightly Price** | **$172.20** | Median price is $127.00, showing a right skew from premium listings. |
+| **Average Nightly Price** | **$172.25** | Median price is $127.00, showing a right skew from premium listings. |
 | **Most Expensive Neighborhood** | **28732 ($213.95 avg)** | Highest prices but the fewest listings (63). |
-| **Cheapest Neighborhood** | **28806 ($164.14 avg)** | Most competitive ZIP code, with 646 listings. |
+| **Cheapest Neighborhood** | **28806 ($163.99 avg)** | Most competitive ZIP code, with 646 listings. |
 | **Dominant Room Type** | **Entire home/apartment (90.7%)** | Reflects Asheville's preference for private stays. |
 | **Top Host Portfolio** | **104 listings (Host ID 167186184)** | A few large hosts control a noticeable share of supply. |
 | **Peak Guest Activity** | **Late spring through summer** | In full years (2021 to 2024), reviews are highest from May to July; January and February are the slowest months. |
@@ -39,7 +39,7 @@ The listings file is a single snapshot, and the reviews file ends in **June 2025
 
 ## 📊 Excel Dashboard
 
-Screenshots from `Analysis/excel/Graphs and pivot tables.xlsx`.
+Screenshots from `Analysis/excel/Asheville Airbnb Dashboard.xlsx`.
 
 **Supply and hosts:** room type distribution, active listings by neighborhood, top hosts, and host scale vs. price.
 
@@ -49,11 +49,11 @@ Screenshots from `Analysis/excel/Graphs and pivot tables.xlsx`.
 
 ![Excel dashboard showing average nightly price by neighborhood, minimum stay vs. nightly price, and average vs. median price by minimum stay](images/dashboard-pricing.png)
 
-**Guest activity:** total reviews by neighborhood, review activity over time, and the most-reviewed listings.
+**Guest activity:** total reviews by year, reviews by month (2021 to 2024), share of reviews by weekday, total reviews by neighborhood, and the most-reviewed listings.
 
-![Excel dashboard showing total reviews by neighborhood, review activity trends over time, and top listings by total guest reviews](images/dashboard-reviews.png)
+![Excel dashboard showing total reviews by year, reviews by month, share of reviews by weekday, total reviews by neighborhood, and top listings by total guest reviews](images/dashboard-reviews.png)
 
-> Note: the "Review Activity Trends Over Time" chart uses the `avg_reviews_per_month` view (listings' average monthly review rate, grouped by the year of their most recent review). It is not a count of reviews per year; yearly review totals come from `review_history.sql`.
+> Note: the yearly, monthly, and weekday review charts come from `review_history.sql` and count individual reviews. The 2025 bar covers January to June only.
 
 ---
 
@@ -148,9 +148,9 @@ The other `.sql` files are earlier drafts of individual questions.
 
 ### 💰 Pricing Trends
 - **Average price:** $172 | **Median:** $127 → right-skewed distribution.
-- **3 to 4 night minimum stays** are priced highest ($221), ahead of 1 to 2 night stays ($171), which make up most listings (1,832).
+- **3 to 4 night minimum stays** are priced highest ($221), ahead of 1 to 2 night stays ($171), which make up most listings (1,836).
 - **Long-term stays (31+ nights)** average around $109, though only 12 listings fall in this group.
-- **ZIP 28732** has the **highest average price ($213.95)**; **28806** has the lowest average ($164.14) and the most listings.
+- **ZIP 28732** has the **highest average price ($213.95)**; **28806** has the lowest average ($163.99) and the most listings.
 
 ### 👥 Host Behavior
 - **Most hosts are small:** about 96% manage 1 to 3 listings.
@@ -202,7 +202,7 @@ Future extensions could include:
 
 ## ▶️ How to Reproduce
 1. Run `Data/Cleaned/CleaningCharacters.py` to create `Listing-Analysis-Clean2.csv` from `Listing-Analysis-Clean1.csv`.
-2. In MySQL Workbench, create a schema named `ashevilleairbnbanalysis` and import `Listing-Analysis-Clean2.csv` as a table named `listing-analysis-clean2` (Table Data Import Wizard).
+2. In MySQL Workbench, create a schema named `ashevilleairbnbanalysis` and import `Listing-Analysis-Clean2.csv` as a table named `listing-analysis-clean2` (Table Data Import Wizard). The table should have **2,332 rows**. The import wizard can skip the 4 listings whose names start with a double quote; if your table has 2,328 rows, run `SQL/queries/insert_missing_listings.sql` to add them.
 3. Run `SQL/queries/combined_clean_version.sql` to create the listing analysis views.
 4. Import `Data/Raw/reviews.csv` as a table named `reviews` (columns `listing_id`, `review_date`), then run `SQL/queries/review_history.sql` to create the review history views. The file also includes an optional `LOAD DATA` statement for importing the CSV directly.
 5. Query the views (for example, `SELECT * FROM avg_price_by_neighborhood;` or `SELECT * FROM reviews_by_weekday;`) and export results to CSV for Excel.
@@ -221,9 +221,10 @@ Future extensions could include:
 |  | `/Data/Cleaned/CleaningCharacters.py` | Script that removes special characters for the MySQL import. |
 | **SQL** | `/SQL/queries/combined_clean_version.sql` | Final listing queries, organized as views. |
 |  | `/SQL/queries/review_history.sql` | Review history queries (by year, month, and weekday) built on `reviews.csv`. |
+|  | `/SQL/queries/insert_missing_listings.sql` | Adds the 4 listings that the import wizard can skip (names starting with a double quote). |
 |  | `/SQL/queries/` (other files) | Earlier drafts of individual queries. |
 |  | `/SQL/results/` | Query results in CSV format, used for the Excel visuals. |
-| **Analysis** | `/Analysis/excel/Graphs and pivot tables.xlsx` | Excel dashboard with PivotTables and charts summarizing the findings. |
+| **Analysis** | `/Analysis/excel/Asheville Airbnb Dashboard.xlsx` | Excel dashboard with KPI cards, PivotTables, and charts summarizing the findings. |
 |  | `/images/` | Dashboard screenshots shown in this README. |
 | **Documentation** | `README.md` | Project overview, findings, and structure. |
 
